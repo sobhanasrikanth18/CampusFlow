@@ -1,0 +1,6 @@
+{
+  "name": "CampusFlow",
+  "description": "Smart Campus & Hostel Management System with digital outpass, leave approval workflows, QR gate verification, visitor registration, and multi-role dashboards.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

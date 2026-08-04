@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusFlow - Smart Campus & Hostel Management System</title>
+    <script>
+      // Suppress benign WebSocket connection error noise in preview container
+      window.addEventListener('unhandledrejection', function(event) {
+        var str = event && event.reason ? String(event.reason) : '';
+        if (str.includes('WebSocket') || str.includes('websocket')) {
+          event.preventDefault();
+        }
+      });
+      window.addEventListener('error', function(event) {
+        var msg = event && event.message ? String(event.message) : '';
+        if (msg.includes('WebSocket') || msg.includes('websocket')) {
+          event.preventDefault();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
