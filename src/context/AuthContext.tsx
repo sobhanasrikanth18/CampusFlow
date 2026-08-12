@@ -31,8 +31,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const res = await fetch('/api/auth/me', {
             headers: { Authorization: `Bearer ${token}` },
           });
-          const data = await res.json();
-          if (data.success && data.user) {
+          const text = await res.text();
+          let data: any = {};
+          try {
+            data = text ? JSON.parse(text) : {};
+          } catch {
+            data = {};
+          }
+          if (res.ok && data.success && data.user) {
             setUser(data.user);
           } else {
             localStorage.removeItem('campusflow_token');
@@ -61,17 +67,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
       });
-      const data = await res.json();
-      if (data.success && data.user) {
+
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (jsonErr) {
+        return {
+          success: false,
+          message: 'Backend server returned an invalid or empty response. Please verify the backend server is running (`npm run dev`).',
+        };
+      }
+
+      if (res.ok && data.success && data.user) {
         setUser(data.user);
         setToken(data.token);
         localStorage.setItem('campusflow_token', data.token);
         return { success: true, message: data.message, user: data.user };
       }
-      return { success: false, message: data.message || 'Login failed. Check credentials.' };
+      return { success: false, message: data.message || `Login failed (Status ${res.status}). Check credentials.` };
     } catch (err: any) {
       console.error('Login request failed:', err);
-      return { success: false, message: err.message || 'Network error during authentication.' };
+      return { success: false, message: err.message || 'Network error connecting to backend server.' };
     } finally {
       setIsLoading(false);
     }
