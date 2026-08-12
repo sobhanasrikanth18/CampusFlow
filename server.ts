@@ -19,7 +19,7 @@ import {
 } from './src/backend/mongoDb.js';
 import { User, UserRole, Outpass, HostelLeave, Visitor, GateLog, ParentNotification } from './src/types.js';
 
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'campusflow_super_secret_jwt_key_2026';
 
 async function startServer() {
