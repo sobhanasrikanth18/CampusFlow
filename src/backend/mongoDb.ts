@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 import dns from 'dns';
 
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {}
+if (process.env.NODE_ENV !== 'production' || process.env.CUSTOM_DNS === 'true') {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {}
+}
 
 import {
   UserModel,
@@ -27,14 +29,23 @@ let isMongoConnected = false;
 
 function fixMongoUri(uri: string) {
   if (!uri) return '';
-  let fixed = uri;
-  const match = uri.match(/^(mongodb(?:\+srv)?:\/\/)([^:]+):(.+)@([^@]+\.[^@]+.*)$/);
+  let fixed = uri.trim();
+  if ((fixed.startsWith('"') && fixed.endsWith('"')) || (fixed.startsWith("'") && fixed.endsWith("'"))) {
+    fixed = fixed.slice(1, -1).trim();
+  }
+  const match = fixed.match(/^(mongodb(?:\+srv)?:\/\/)([^:]+):(.+)@([^@]+\.[^@]+.*)$/);
   if (match) {
     const protocol = match[1];
     const username = match[2];
     const rawPassword = match[3];
     const hostAndQuery = match[4];
-    const encodedPassword = encodeURIComponent(rawPassword);
+    let decodedPassword = rawPassword;
+    try {
+      decodedPassword = decodeURIComponent(rawPassword);
+    } catch (e) {
+      decodedPassword = rawPassword;
+    }
+    const encodedPassword = encodeURIComponent(decodedPassword);
     fixed = `${protocol}${username}:${encodedPassword}@${hostAndQuery}`;
   }
   if (fixed.match(/mongodb\.net\/?(\?.*)?$/)) {

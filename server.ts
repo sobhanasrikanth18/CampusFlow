@@ -1992,12 +1992,20 @@ async function startServer() {
     }
   });
 
-  // API Fallback 404 Handler - Prevents Vite SPA Middleware from serving HTML for undefined API paths
+  // API Fallback 404 Handler - Prevents SPA Middleware from serving HTML for undefined API paths
   app.use('/api/*', (req, res) => {
     return res.status(404).json({
       success: false,
       message: `API endpoint '${req.originalUrl}' not found.`,
     });
+  });
+
+  // Security Middleware: Block direct browser access to compiled server bundle or map files
+  app.use((req, res, next) => {
+    if (req.path === '/server.cjs' || req.path.endsWith('.map')) {
+      return res.status(404).json({ success: false, message: 'Resource not found' });
+    }
+    next();
   });
 
   // Vite development middleware or static production handler
@@ -2010,13 +2018,13 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[CampusFlow Server] Running on http://localhost:${PORT}`);
+    console.log(`[CampusFlow Server] Running on http://0.0.0.0:${PORT}`);
   });
 }
 
